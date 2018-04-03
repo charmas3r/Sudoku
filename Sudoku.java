@@ -137,6 +137,7 @@ public class Sudoku extends JFrame {
        return random;
    }
    
+ // this method is wrong and needs work.
    public void fillBoard(int[][] arry) {
       for (int row = 0; row < GRID_SIZE; ++row) {
            for (int col = 0; col < GRID_SIZE; ++col) {
@@ -150,6 +151,7 @@ public class Sudoku extends JFrame {
        }
    }
    
+ //fillRow still not filling the row with unique numbers. needs work
    public void fillRow(int[][] arry) {
        int row = 0;
     
