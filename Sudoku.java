@@ -69,7 +69,7 @@ public class Sudoku extends JFrame {
       
       Panel cp = new Panel(new GridLayout(GRID_SIZE, GRID_SIZE));  // 9x9 GridLayout
       
-      fillRow(puzzle);
+      fillRow(0, puzzle);
       
       // Allocate a common listener as the ActionEvent listener for all the
       //  JTextFields
@@ -137,60 +137,142 @@ public class Sudoku extends JFrame {
        return random;
    }
    
- // this method is wrong and needs work.
-   public void fillBoard(int[][] arry) {
-      for (int row = 0; row < GRID_SIZE; ++row) {
-           for (int col = 0; col < GRID_SIZE; ++col) {
-                int temp = randNumGen();
-                if (!uniqueRow(temp, arry))
-                    arry[row][col] = temp; //insert unique int into the board
-                else {
-                    col--; // if not unique repeat filling procedure for this spot
-                }
-            }
-       }
-   }
+   // public void fillBoard(int[][] arry) {
+      // for (int row = 0; row < GRID_SIZE; ++row) {
+           // for (int col = 0; col < GRID_SIZE; ++col) {
+                // int temp = randNumGen();
+                // if (!uniqueRow(temp, arry))
+                    // arry[row][col] = temp; //insert unique int into the board
+                // else {
+                    // col--; // if not unique repeat filling procedure for this spot
+                // }
+            // }
+       // }
+   // }
    
- //fillRow still not filling the row with unique numbers. needs work
-   public void fillRow(int[][] arry) {
-       int row = 0;
+   // public void fillRow(int row, int[][] arry) {
+       // int count = 0;
     
-       for (int col = 0; col < GRID_SIZE; ++col) {
-           int temp = randNumGen();
+       // for (int col = 0; col < GRID_SIZE; ++col) {
+           // int temp = randNumGen();
            
-           if (!uniqueRow(temp, arry)) {
-                arry[row][col] = temp; //insert unique int into the board
-            }
+           // if (uniqueRow(row, temp, arry)) {
+                // arry[row][col] = temp; //insert unique int into the board
+            // }
            
-           //if checking shows the same int in the row
-           else {
-               temp = randNumGen(); //generate new random number
+           // if checking shows the same int in the row
+           // else {
+             
+               // fill the spot with a unique number
+               // do{
+                    // count = 0;
+                    // temp = randNumGen();
+                   
+                    // if (uniqueRow(row, temp, arry)) {
+                       // arry[row][col] = temp; //insert unique int into the board
+                       // count++;
+                    // }
+
                
-               //fill the spot with a unique number
-               while (!uniqueRow(temp, arry)) {
-                 
-                 
-                 if (!uniqueRow(temp, arry)) {
-                     arry[row][col] = temp; //insert unique int into the board
-                 }
-                 
-                 temp = randNumGen();
-               }
-           }
-        }
-   }
+               // } while(count == 0);
+            // }
+        // }
+   // }
    
-   public boolean uniqueRow(int test, int[][] arry) {
-       int row = 0;
-       
-       for (int col =0; col < GRID_SIZE; ++col) {
-           if (test == arry[row][col])
-                return true;
-       }
-       
-       return false;
+    public boolean uniqueRow(int row, int num, int[][]arry) {
+     for (int col = 0; col < GRID_SIZE; ++ col) {
+           if (num == arry[row][col]) {
+              return false;
+           }
+     }
+     return true;
+}
+
+public boolean uniqueColumn(int col, int num, int[][]arry) {
+     for (int row = 0; row < GRID_SIZE; ++row) {
+          if (num == arry[row][col]) {
+             return false;
+          }
+     }
+     return true;
+}
+
+public boolean uniqueSubP2(int row, int col, int num, int[][]arry) {
+     int r = row;
+     int c = col;
+     while (row != r + 3) {
+          while (col != c + 3) {
+                    if (num == arry[row][col])
+                            return false;
+                    ++c;
+          }
+          ++r;
+        }
+        return true;
+}
+
+public boolean uniqueSubP1(int row, int col, int num, int[][]arry) {
+     int r = 0;
+     int c = 0;
+     int n = num; //not sure if this is necessary
+     if (0 <= row && row <= 2) {
+        if (0 <= col && col <= 2) {
+           r = 0;
+           c = 0;
+        }
+        else if (3 <= col && col <=5) {
+           r = 0;
+           c = 3;
+        }
+        else {
+           r = 0;
+           c = 6;
+        }
     }
-    
+    else if (2 <= row && row <= 5) {
+        if (0 <= col && col <= 2) {
+           r = 3;
+           c = 0;
+        }
+        else if (2 <= col && col <=5) {
+           r = 3;
+           c = 3;
+        }
+        else {
+           r = 3;
+           c = 6;
+        }
+    }
+    else {
+        if (6 <= row && row <= 8) {
+            if (0 <= col && col <= 2) {
+                r = 6;
+                c = 0;
+            }
+            else if (3 <= col && col <= 5) {
+                r = 6;
+                c = 3;
+            }
+            else {
+                r = 6;
+                c = 6;
+            }
+        }
+    }
+    boolean state = uniqueSubP2(r, c, n, arry);
+    return state;
+}
+
+public void fillRow(int row, int[][] arry) {
+     for (int col = 0; col < GRID_SIZE; ++col) {
+           int temp = randNumGen();
+           //  && !uniqueColumn(col, temp, arry)|| !uniqueSubP1(row, col, temp, arry)
+           while (!uniqueRow(row, temp, arry) )
+                  temp = randNumGen();
+           arry[row][col] = temp;
+     }
+}
+
    /** The entry main() entry method */
    public static void main(String[] args) {
       // [TODO 1] (Now)
