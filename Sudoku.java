@@ -32,14 +32,16 @@ public class Sudoku extends JFrame {
 
    private int[][] puzzle = new int[GRID_SIZE][GRID_SIZE];      
        
-   private int[] badNums = new int[GRID_SIZE];
-   
-   private TreeSet possSet = new TreeSet();
-   
-   private Stack backtrackStack = new Stack();
-   private Stack possStack = new Stack();
-   
-   private int[][] location = new int[GRID_SIZE][GRID_SIZE];   
+   private Stack stack1 = new Stack();
+   private Stack stack2 = new Stack();
+   private Stack stack3 = new Stack();
+   private Stack stack4 = new Stack();
+   private Stack stack5 = new Stack();
+   private Stack stack6 = new Stack();
+   private Stack stack7 = new Stack();
+   private Stack stack8 = new Stack();
+   private Stack stack9 = new Stack();
+      
    
        // Hardcoded game board
        //for testing remove: (0,0) = 5
@@ -86,9 +88,16 @@ public class Sudoku extends JFrame {
       Panel pd2 = new Panel(new FlowLayout(FlowLayout.RIGHT));
       pd2.add(restart);
       pd2.add(timer);
+      
+      //test
+      //for (int i = 1; i <= GRID_SIZE; ++i) 
 
+      
       //int number = randNumGen();
-      //fillCell (number, puzzle);
+      //startPoss(poss);
+      boolean board = fillBoard(puzzle);
+      //fillRow(0, puzzle);
+      //fillRow(1, puzzle);
       
       //public void fillCell(int row, int col, int num, int[][] arry, int[] badNums)
       Panel cp = new Panel(new GridLayout(GRID_SIZE, GRID_SIZE));  // 9x9 GridLayout
@@ -162,12 +171,21 @@ public class Sudoku extends JFrame {
    }
    
    //dump and replace.
-   public void fillBoard(int[][] arry) {
-            
-           int row = 0;
+   public boolean fillBoard(int[][] arry) {
            
-           fillRow(row, arry);
+           int row = 0; 
            
+           if (boardFull()) 
+              return true;
+        
+           //keep trying to fill the board   
+           else {
+               fillRow(row++, arry);
+               return fillBoard(arry);
+               
+           }
+           
+           //return fillBoard(arry);
            
    }
    
@@ -198,8 +216,8 @@ public class Sudoku extends JFrame {
                // } while(count == 0);
             // }
         // }
-   // }
-
+   
+    // }
 //Checks from top left   
 public boolean uniqueRow(int row, int num, int[][]arry) {
      for (int col = 0; col < GRID_SIZE; ++col) {
@@ -293,92 +311,260 @@ public boolean uniqueCheck(int row, int col, int num, int[][] arry) {
 }
 
 //find all real possibilities
-public void addPoss(int row, int col, int[][] arry, TreeSet pass) {
-    // iterates through 1-9. if num is unique it is added to the possiblity set
-    for (int i = 1; i <= GRID_SIZE; ++i) {
-        if(uniqueCheck(row, col, i, arry))
-           pass.add(i);
+public void addPoss(int row, int col, int[][] arry, ArrayList<Integer> possList) {
+    // iterates through 1-9. if num is unique it is added to poss. list
+    
+    for (int i = 0; i < GRID_SIZE; ++i) {
+       
+        if (uniqueCheck(row, col, i, arry))
+            possList.add(i);
     }
 
+    Collections.shuffle(Arrays.asList(possList));
 }
 
+
+public void findCell(int[][] arry, ArrayList<Integer> possList) {
+    
+    //iterate through the whole board
+    for (int i = 0; i < GRID_SIZE; ++i) { 
+        
+        for (int j = 0; j < GRID_SIZE; ++j) {
+                
+                //at each location find the size of full possibility list.
+                
+                addPoss(i, j, arry, possList);
+                int temp = possList.size();
+                
+                
+                //if the poss. list is 1, then push to first stack
+                if (temp == 1) {
+                    stack1.push(j);
+                    stack1.push(i);
+                }
+                
+                else if (temp == 2) {
+                    stack2.push(j);
+                    stack2.push(i);
+                }
+                
+                else if (temp == 3) {
+                    stack3.push(j);
+                    stack3.push(i);
+                }    
+                
+                else if (temp == 4) {
+                    stack4.push(j);
+                    stack4.push(i);
+                }    
+                
+                else if (temp == 5) {
+                    stack5.push(j);
+                    stack5.push(i);
+                }    
+                
+                else if (temp == 6) {
+                    stack6.push(j);
+                    stack6.push(i);
+                }    
+                
+                else if (temp == 7) {
+                    stack7.push(j);
+                    stack7.push(i);
+                }    
+                
+                else if (temp == 8) {
+                    stack8.push(j);
+                    stack8.push(i);
+                }    
+                
+                else  {
+                    stack9.push(j);
+                    stack9.push(i);
+                }    
+                
+                
+                
+               
+            }
+    
+    }
+    
+    //now find the first non empty stack
+                //and pop the row and col into it
+                if (!stack1.isEmpty()) {
+                    locations.push(stack1.pop);
+                    locations.push(stack1.pop);
+                }
+                else if (!stack2.isEmpty()) {
+                    locations.push(stack2.pop);
+                    locations.push(stack2.pop);
+                }
+                else if (!stack3.isEmpty()) {
+                    locations.push(stack3.pop);
+                    locations.push(stack3.pop);
+                }
+                else if (!stack4.isEmpty()) {
+                    locations.push(stack4.pop);
+                    locations.push(stack4.pop);
+                }
+                else if (!stack5.isEmpty()) {
+                    locations.push(stack5.pop);
+                    locations.push(stack5.pop);
+                }
+                else if (!stack6.isEmpty()) {
+                    locations.push(stack6.pop);
+                    locations.push(stack6.pop);
+                }
+                else if (!stack7.isEmpty()) {
+                    locations.push(stack7.pop);
+                    locations.push(stack7.pop);
+                }
+                else if (!stack8.isEmpty()) {
+                    locations.push(stack8.pop);
+                    locations.push(stack8.pop);
+                }
+                else {
+                    locations.push(stack9.pop);
+                    locations.push(stack9.pop);
+                }
+}
+// public void startPoss(int[] pass) {
+    // int temp = randNumGen();
+    // int count = 0;
+    
+    // while (count != 9) {
+        // for (int i = 1 i <=;
+    // }
+        
+    // //randomize elements
+    // Collections.shuffle(Arrays.asList(pass));
+// }
+
+// public void deleteElement(int arr[], int x)
+    // {
+        // // Search x in array
+        // int i;
+        // for (i=0; i<arr.length; i++)
+            // if (arr[i] == x)
+                // break;
+  
+        // // If x found in array
+        // if (i < arr.length)
+        // {
+            // // reduce size of array and move all
+            // // elements on space ahead
+            // int n = arr.length;
+            
+            // n = n - 1;
+            // for (int j=i; j<arr.length; j++)
+                // arr[j] = arr[j+1];
+        // }
+  
+        // Collections.shuffle(Arrays.asList(arr));
+    // }
       
-public boolean stackCheck(int num, Stack pass) {
-   int temp;
-   Stack tempStack = new Stack();
+// public boolean stackCheck(int num, Stack pass) {
+   // int temp;
+   // Stack tempStack = new Stack();
    
    // makes a copy of current passed stack
-   tempStack.addAll(pass);
+   // tempStack.addAll(pass);
    
-   //pop one element at a temp of the copied stack to check if passed num is in stack. 
-      for (int i = 0; i < tempStack.size(); ++i) {
-          temp = (Integer) tempStack.pop();  
-              if (temp == num) 
-              return false;
-   }      
+   // pop one element at a temp of the copied stack to check if passed num is in stack. 
+      // for (int i = 0; i < tempStack.size(); ++i) {
+          // temp = (Integer) tempStack.pop();  
+              // if (temp == num) 
+              // return false;
+   // }      
       
-   return true;
-}
+   // return true;
+// }
       
-public void fillCell(int row, int col, int[][] arry) {
+// public void fillCell(int row, int col, int[][] arry, int[] possSet) {
 
-      //when we move up a cell, we need to find all possibilites for the current cell
-      //to do that we need to eliminate any other numbers that show up in a row, column or subgrid
+      // when we move up a cell, we need to find all possibilites for the current cell
+      // to do that we need to eliminate any other numbers that show up in a row, column or subgrid
       
-      //first clear the current possiblity set
-      possSet.clear();
+      // if (boardFull())
+          // return;    
       
-      //find all possibilities
-      addPoss(row, col, arry, possSet);
+      // take one possibility and try to insert it
+      // int temp = possSet[0];
       
-      //take one possibility and try to insert it, removing it at the same time
-      int temp = (Integer) possSet.pollFirst();
-      arry[row][col] = temp;
+      // in case board state fails later on in the puzzle, save location where we added 
+      // and possibility set. both get put on different stacks.
+      // possStack.push(possSet);
+         
       
-      //in case board state fails later on in the puzzle, save location where we added 
-      //and possibility set. both get put on different stacks.
-      possStack.add(possSet);
-      backtrackStack.add(row, col);
-      
-      
-      //test board state, if it passes then go to the next spot and repeat the process. 
-      if (uniqueCheck(row, col, temp, puzzle)) { 
+      // test board state, if it passes then go to the next spot and repeat the process. 
+      // if (uniqueCheck(row, col, temp, puzzle)) { 
           
-          //move to next cell in current row, if we reach the end of the row wrap to the next line
-          if(col == 8) {
-            ++row;
-            col = 0;
-          }
-          else
-            ++col;
+          // push location
+          // backtrackStack.push(col);
+          // backtrackStack.push(row);
           
+          // add number to the puzzle
+          // arry[row][col] = temp;
           
-          fillCell(row, col, puzzle);
-      }
+          // move to next cell in current row, if we reach the end of the row wrap to the next line
+          // if(col == 8) {
+            // ++row;
+            // col = 0;
+          // }
+          // else
+            // ++col;
+          
+          // get all possibilities for next cell
+          // addPoss(row, col, arry, possSet);
+          // deleteElement(possSet, temp);
+         
+          // fillCell(row, col, puzzle, possSet);
+      // }
       
-      //else board state fails, start backtracking
-      
+      // else board state fails, start backtracking
+      // else {
+          
+          // we need pop the location  
+          // row = (Integer) backtrackStack.pop();
+          // col = (Integer) backtrackStack.pop();
+          
+          // pop possibilities of previous cell
+          // possSet = (TreeSet) possStack.pop();
+          // addPoss(row, col, arry, possSet);
+          
+          // remove the last cell's current element from its possibility set
+          // addPoss(row, col, arry, possSet);
+          // deleteElement(possSet, temp);
+          
+          // call method again
+          //fillCell(row, col, puzzle, possSet);
+     // }
 
-}
+//}
+
 public void fillRow(int row, int[][] arry) {
+     
      for (int col = 0; col < GRID_SIZE; ++col) {
            int temp = randNumGen();
-           //|| !uniqueSubP1(row, col, temp, arry) || 
-           while (!uniqueRow(row, temp, arry) || !uniqueColumn(col, temp, arry))
-                  temp = randNumGen();
+           
+           while (!uniqueCheck(row, col, temp, arry))
+                temp = randNumGen();
+               
            arry[row][col] = temp;
+                
      }
 }
 
-public void fillColumn(int col, int[][] arry) {
-     for (int row = 0; row < GRID_SIZE; ++row) {
-           int temp = randNumGen();
-           //  && !uniqueColumn(col, temp, arry)|| !uniqueSubP1(row, col, temp, arry)
-           while (!uniqueColumn(row, temp, arry) )
-                  temp = randNumGen();
-           arry[row][col] = temp;
-     }
-}
+// public void fillColumn(int col, int[][] arry) {
+     // for (int row = 0; row < GRID_SIZE; ++row) {
+           // int temp = randNumGen();
+           // //  && !uniqueColumn(col, temp, arry)|| !uniqueSubP1(row, col, temp, arry)
+           // while (!uniqueColumn(row, temp, arry) )
+                  // temp = randNumGen();
+           // arry[row][col] = temp;
+     // }
+// }
 
    /** The entry main() entry method */
    public static void main(String[] args) {
