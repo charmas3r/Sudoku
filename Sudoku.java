@@ -2,7 +2,9 @@ import java.util.*;       // Math Random
 import java.awt.*;        // Uses AWT's Layout Managers
 import java.awt.event.*;  // Uses AWT's Event Handlers
 import javax.swing.*;     // Uses Swing's Container/Components
- 
+import java.util.Stack;
+import java.util.ArrayList;
+import java.util.Collections;
 /**
  * The Sudoku game.
  * To solve the number puzzle, each row, each column, and each of the
@@ -30,8 +32,15 @@ public class Sudoku extends JFrame {
    private JTextField[][] tfCells = new JTextField[GRID_SIZE][GRID_SIZE];
  
    // Hardcoded game board
-   private int[][] puzzle = new int[9][9];
+   private int[][] puzzle = new int[GRID_SIZE][GRID_SIZE];
+   private Stack locations = new Stack();
+   private ArrayList<Integer> possibilities = new ArrayList<Integer>();
    
+   private boolean[][] masks2 =
+      {{false, false, false},
+       {false, false, false},
+       {false, false, false}};
+       
    private boolean[][] masks =
       {{false, false, false, false, false, false, false, false, false},
        {false, false, false, false, false, false, false, false, false},
@@ -66,10 +75,10 @@ public class Sudoku extends JFrame {
       pd2.add(restart);
       pd2.add(timer);
 
+      firstCell(puzzle);
+      fillCell(puzzle, possibilities);
       
       Panel cp = new Panel(new GridLayout(GRID_SIZE, GRID_SIZE));  // 9x9 GridLayout
-      
-      fillRow(0, puzzle);
       
       // Allocate a common listener as the ActionEvent listener for all the
       //  JTextFields
@@ -116,135 +125,95 @@ public class Sudoku extends JFrame {
    }
  
    public boolean slotFull(int r, int c) {
-       if (puzzle[r][c] == 0) {
-           return false;
-        }
-       return true;
+      if (puzzle[r][c] == 0) {
+          return false;
+       }
+      return true;
    }
    
    public boolean boardFull() {
-       for (int row = 0; row < GRID_SIZE; ++row) {
-           for (int col = 0; col < GRID_SIZE; ++col) {
-                slotFull(row, col);
-            }
-       }
-       return true;
+      boolean state;
+      for (int row = 0; row < GRID_SIZE; ++row) {
+          for (int col = 0; col < GRID_SIZE; ++col) {
+                state = slotFull(row, col);
+                if(state == false) {
+                    return false;
+                }
+          }
+      }
+      return true;
    }
    
    public int randNumGen() {
-       Random generate = new Random();
-       int random = generate.nextInt(9) + 1;
-       return random;
+      Random generate = new Random();
+      int random = generate.nextInt(9) + 1;
+      return random;
    }
    
-   // public void fillBoard(int[][] arry) {
-      // for (int row = 0; row < GRID_SIZE; ++row) {
-           // for (int col = 0; col < GRID_SIZE; ++col) {
-                // int temp = randNumGen();
-                // if (!uniqueRow(temp, arry))
-                    // arry[row][col] = temp; //insert unique int into the board
-                // else {
-                    // col--; // if not unique repeat filling procedure for this spot
-                // }
-            // }
-       // }
-   // }
-   
-   // public void fillRow(int row, int[][] arry) {
-       // int count = 0;
-    
-       // for (int col = 0; col < GRID_SIZE; ++col) {
-           // int temp = randNumGen();
-           
-           // if (uniqueRow(row, temp, arry)) {
-                // arry[row][col] = temp; //insert unique int into the board
-            // }
-           
-           // if checking shows the same int in the row
-           // else {
-             
-               // fill the spot with a unique number
-               // do{
-                    // count = 0;
-                    // temp = randNumGen();
-                   
-                    // if (uniqueRow(row, temp, arry)) {
-                       // arry[row][col] = temp; //insert unique int into the board
-                       // count++;
-                    // }
-
-               
-               // } while(count == 0);
-            // }
-        // }
-   // }
-   
-    public boolean uniqueRow(int row, int num, int[][]arry) {
-     for (int col = 0; col < GRID_SIZE; ++ col) {
-           if (num == arry[row][col]) {
-              return false;
-           }
-     }
-     return true;
-}
-
-public boolean uniqueColumn(int col, int num, int[][]arry) {
-     for (int row = 0; row < GRID_SIZE; ++row) {
+   public boolean uniqueRow(int row, int num, int[][]arry) {
+      for (int col = 0; col < GRID_SIZE; ++ col) {
           if (num == arry[row][col]) {
              return false;
           }
-     }
-     return true;
-}
+      }
+      return true;
+   }
 
-public boolean uniqueSubP2(int row, int col, int num, int[][]arry) {
-     int r = row;
-     int c = col;
-     while (row != r + 3) {
-          while (col != c + 3) {
-                    if (num == arry[row][col])
-                            return false;
-                    ++c;
+   public boolean uniqueColumn(int col, int num, int[][]arry) {
+      for (int row = GRID_SIZE - 1; row >= 0; --row) {
+          if (num == arry[row][col]) {
+             return false;
           }
-          ++r;
-        }
-        return true;
-}
+      }
+      return true;
+   }
 
-public boolean uniqueSubP1(int row, int col, int num, int[][]arry) {
-     int r = 0;
-     int c = 0;
-     int n = num; //not sure if this is necessary
-     if (0 <= row && row <= 2) {
-        if (0 <= col && col <= 2) {
-           r = 0;
-           c = 0;
-        }
-        else if (3 <= col && col <=5) {
+   public boolean uniqueSubP2(int row, int col, int num, int[][] arry) {
+    
+       for (int r = row; r < row + 3; ++r) { 
+           for (int c = col; c < col + 3; ++c) {
+               if (num == arry[r][c])
+               return false;
+           }
+          
+       }
+       return true;
+   }
+
+   public boolean uniqueSubP1(int row, int col, int num, int[][] arry) {
+      int r = 0;
+      int c = 0;
+      int n = num; //not sure if this is necessary
+      if (0 <= row && row <= 2) {
+         if (0 <= col && col <= 2) {
+            r = 0;
+            c = 0;
+         }
+         else if (3 <= col && col <=5) {
            r = 0;
            c = 3;
-        }
-        else {
+         }
+         else {
            r = 0;
            c = 6;
-        }
-    }
-    else if (2 <= row && row <= 5) {
-        if (0 <= col && col <= 2) {
+          }
+      }
+      else if (2 <= row && row <= 5) {
+         if (0 <= col && col <= 2) {
            r = 3;
            c = 0;
-        }
-        else if (2 <= col && col <=5) {
+          }
+         else if (2 <= col && col <=5) {
            r = 3;
            c = 3;
-        }
-        else {
+          }
+         else {
            r = 3;
            c = 6;
-        }
-    }
-    else {
-        if (6 <= row && row <= 8) {
+          }
+      }
+      else {
+         if (6 <= row && row <= 8) {
             if (0 <= col && col <= 2) {
                 r = 6;
                 c = 0;
@@ -257,22 +226,129 @@ public boolean uniqueSubP1(int row, int col, int num, int[][]arry) {
                 r = 6;
                 c = 6;
             }
-        }
+         }
+      }
+      boolean state = uniqueSubP2(r, c, n, arry);
+      return state;
+   }
+
+   public boolean uniqueCheck(int row, int col, int num, int[][]arry) {
+      if(uniqueRow(row, num, arry) && uniqueColumn(col, num, arry) && uniqueSubP1(row, col, num, arry))
+          return true;
+      else 
+          return false;
+      }
+    
+   //fills the very first cell in our board so we can get the recursive method started
+   public void firstCell(int[][] arry) {
+      int num = randNumGen();
+      arry[0][0] = num;
+      locations.push(0);
+      locations.push(0);
+   }
+   
+   //find all real possibilities
+   public void addPoss(int row, int col, int[][] arry, ArrayList<Integer> possibilities) {
+      // iterates through 1-9. if num is unique it is added to poss. list
+
+      for (int i = 1; i < GRID_SIZE + 1; ++i) {
+         if (uniqueCheck(row, col, i, arry))
+            possibilities.add(i);
+      }
+
+      Collections.shuffle(Arrays.asList(possibilities));
+   }
+   
+   public void findCell(int[][]arry){
+      int constrained = 9;
+      int row = 0;
+      int col = 0;     
+      //iterate through board
+       for(int i = 0; i < GRID_SIZE; ++i) {
+         for(int j = 0; j < GRID_SIZE; ++j) {
+            //skip cells with numbers
+            if(arry[i][j] != 0)
+               continue;
+            //call add and get count
+            addPoss(i, j, arry, possibilities);
+            int count = possibilities.size();
+            //compare, make constrained = count if <=
+            if(count <= constrained) {
+               constrained = count;
+               row = i;
+               col = j;
+            }
+            //**IMPORTANT: CLEAR POSSIBILITIES LIST EVERYTIME
+            possibilities.clear();
+         }
+      }
+      locations.push(col);
+      locations.push(row);
     }
-    boolean state = uniqueSubP2(r, c, n, arry);
-    return state;
-}
-
-public void fillRow(int row, int[][] arry) {
-     for (int col = 0; col < GRID_SIZE; ++col) {
-           int temp = randNumGen();
-           //  && !uniqueColumn(col, temp, arry)|| !uniqueSubP1(row, col, temp, arry)
-           while (!uniqueRow(row, temp, arry) )
-                  temp = randNumGen();
-           arry[row][col] = temp;
-     }
-}
-
+   //will fill based on board constraints
+   
+   public void fillCell(int[][] arry, ArrayList possibilities) {
+      
+      //call findCell here to push row and col into stack
+      
+      findCell(arry);
+      
+      //retrieve row and col, we want to use peek so they stay in stack
+      
+      int row = (Integer) locations.pop();
+      int col = (Integer) locations.pop();
+      
+      locations.push(col);
+      locations.push(row);
+      
+      addPoss(row, col, arry, possibilities);
+      //make collections class later? shuffles the elements inside arraylist
+      
+      Collections.shuffle(possibilities);
+      
+      //if there's a possibility for this cell
+      if(boardFull()){      
+         possibilities.clear();   
+         return;
+        }
+         
+      if(!possibilities.isEmpty()) {
+          
+         //grab the first element, because it's shuffled it doesn't matter
+         
+         int num = (Integer) possibilities.get(0);
+         
+         //set that cell = to num
+         
+         arry[row][col] = num;
+         
+         //recursive call (which creates new arraylist, recalls find cell, etc...)
+         possibilities.clear();
+         fillCell(arry, possibilities);
+      }
+      else {
+          
+         //this time we want to pop instead of peek so we can remove the elements
+         
+         //if we didn't pop, the algorithm would only ever look at the last row and col placed
+         
+         //and never see the row's and col's placed before it.
+         while(possibilities.size() == 0) {
+            possibilities.clear();
+            row = (Integer) locations.pop();        
+            col = (Integer) locations.pop();
+            addPoss(row, col, arry, possibilities);
+         }
+         
+         //remove the num that's still in this int num in this step of recursive function
+         
+         //possibilities.remove(arry[row][col]);
+         
+         //recursive call
+         
+         fillCell(arry, possibilities);
+      }    
+   }
    /** The entry main() entry method */
    public static void main(String[] args) {
       // [TODO 1] (Now)
