@@ -330,7 +330,8 @@ public class Sudoku extends JFrame {
       
       //if there's a possibility for this cell and board is solvable
       if(boardFull()){      
-         possibilities.clear();   
+         possibilities.clear();
+         return;
         }
          
       if(!possibilities.isEmpty()) {
