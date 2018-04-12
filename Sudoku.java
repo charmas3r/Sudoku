@@ -168,21 +168,60 @@ public class Sudoku extends JFrame {
       return true;
    }
 
-   public boolean uniqueSubGrid(int row, int col, int num, int[][] arry) {
-      int row = row / 3;
-      int col = col / 3;
-      
-      for (int r = row; r < row + 3; ++r) {
-          for (int c = col; c < col + 3; ++C) {
-              if (num == arry[r][c])
-                 return false;
+   public boolean uniqueSubP1(int row, int col, int num, int[][] arry) {
+      int r = 0;
+      int c = 0;
+      int n = num; //not sure if this is necessary
+      if (0 <= row && row <= 2) {
+         if (0 <= col && col <= 2) {
+            r = 0;
+            c = 0;
+         }
+         else if (3 <= col && col <=5) {
+           r = 0;
+           c = 3;
+         }
+         else {
+           r = 0;
+           c = 6;
           }
       }
-      return true;
+      else if (2 <= row && row <= 5) {
+         if (0 <= col && col <= 2) {
+           r = 3;
+           c = 0;
+          }
+         else if (2 <= col && col <=5) {
+           r = 3;
+           c = 3;
+          }
+         else {
+           r = 3;
+           c = 6;
+          }
+      }
+      else {
+         if (6 <= row && row <= 8) {
+            if (0 <= col && col <= 2) {
+                r = 6;
+                c = 0;
+            }
+            else if (3 <= col && col <= 5) {
+                r = 6;
+                c = 3;
+            }
+            else {
+                r = 6;
+                c = 6;
+            }
+         }
+      }
+      boolean state = uniqueSubP2(r, c, n, arry);
+      return state;
    }
 
    public boolean uniqueCheck(int row, int col, int num, int[][]arry) {
-      if(uniqueRow(row, num, arry) && uniqueColumn(col, num, arry) && uniqueSubGrid(row, col, num, arry))
+      if(uniqueRow(row, num, arry) && uniqueColumn(col, num, arry) && uniqueSubP1(row, col, num, arry))
           return true;
       else 
           return false;
