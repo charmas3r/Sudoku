@@ -37,20 +37,12 @@ public class Sudoku extends JFrame {
    private ArrayList<Integer> possibilities = new ArrayList<Integer>();
    
    private boolean[][] masks2 =
-      {{false, false, false},
+      {{false, true, false},
        {false, false, false},
        {false, false, false}};
        
-   private boolean[][] masks =
-      {{false, false, false, false, false, false, false, false, false},
-       {false, false, false, false, false, false, false, false, false},
-       {false, false, false, false, false, false, false, false, false},
-       {false, false, false, false, false, false, false, false, false},
-       {false, false, false, false, false, false, false, false, false},
-       {false, false, false, false, false, false, false, false, false},
-       {false, false, false, false, false, false, false, false, false},
-       {false, false, false, false, false, false, false, false, false},
-       {false, false, false, false, false, false, false, false, false}};
+   private boolean[][] masks = new boolean[GRID_SIZE][GRID_SIZE];
+
        
        //Buttons for game
        JButton easy = new JButton("Easy");
@@ -77,6 +69,7 @@ public class Sudoku extends JFrame {
 
       
       fillBoard(puzzle);
+      maskBoard(puzzle);
       
       Panel cp = new Panel(new GridLayout(GRID_SIZE, GRID_SIZE));  // 9x9 GridLayout
       
@@ -153,7 +146,7 @@ public class Sudoku extends JFrame {
    }
    
    public void fillBoard(int[][] arry) {
-       firstCell(puzzle);
+       //firstCell(puzzle);
        
        if(boardFull()){      
           possibilities.clear(); 
@@ -162,6 +155,7 @@ public class Sudoku extends JFrame {
        
        while (!boardFull()) {
            boardReset(arry);
+           firstCell(puzzle);
            fillCell(arry, possibilities);
        }
     }
@@ -190,8 +184,11 @@ public class Sudoku extends JFrame {
       return true;
    }
 
-   public boolean uniqueSubP2(int row, int col, int num, int[][] arry) {
-    
+   public boolean uniqueSubGrid(int row, int col, int num, int[][] arry) {
+       row = (row / 3) * 3;
+       col = (col / 3) * 3;
+       
+       
        for (int r = row; r < row + 3; ++r) { 
            for (int c = col; c < col + 3; ++c) {
                if (num == arry[r][c])
@@ -202,60 +199,9 @@ public class Sudoku extends JFrame {
        return true;
    }
 
-   public boolean uniqueSubP1(int row, int col, int num, int[][] arry) {
-      int r = 0;
-      int c = 0;
-      int n = num; //not sure if this is necessary
-      if (0 <= row && row <= 2) {
-         if (0 <= col && col <= 2) {
-            r = 0;
-            c = 0;
-         }
-         else if (3 <= col && col <=5) {
-           r = 0;
-           c = 3;
-         }
-         else {
-           r = 0;
-           c = 6;
-          }
-      }
-      else if (2 <= row && row <= 5) {
-         if (0 <= col && col <= 2) {
-           r = 3;
-           c = 0;
-          }
-         else if (2 <= col && col <=5) {
-           r = 3;
-           c = 3;
-          }
-         else {
-           r = 3;
-           c = 6;
-          }
-      }
-      else {
-         if (6 <= row && row <= 8) {
-            if (0 <= col && col <= 2) {
-                r = 6;
-                c = 0;
-            }
-            else if (3 <= col && col <= 5) {
-                r = 6;
-                c = 3;
-            }
-            else {
-                r = 6;
-                c = 6;
-            }
-         }
-      }
-      boolean state = uniqueSubP2(r, c, n, arry);
-      return state;
-   }
 
    public boolean uniqueCheck(int row, int col, int num, int[][]arry) {
-      if(uniqueRow(row, num, arry) && uniqueColumn(col, num, arry) && uniqueSubP1(row, col, num, arry))
+      if(uniqueRow(row, num, arry) && uniqueColumn(col, num, arry) && uniqueSubGrid(row, col, num, arry))
           return true;
       else 
           return false;
@@ -307,6 +253,7 @@ public class Sudoku extends JFrame {
       locations.push(col);
       locations.push(row);
     }
+  
    //will fill based on board constraints
    
    public void fillCell(int[][] arry, ArrayList possibilities) {
@@ -350,7 +297,6 @@ public class Sudoku extends JFrame {
       }
       else {
           
-         //this time we want to pop instead of peek so we can remove the elements
          
          //if we didn't pop, the algorithm would only ever look at the last row and col placed
          
@@ -376,6 +322,67 @@ public class Sudoku extends JFrame {
          fillCell(arry, possibilities);
       }    
    }
+   
+   public void maskSubGrid(int row, int col)
+   {
+       row = (row / 3) * 3;
+       col = (col / 3) * 3;
+       
+       //mask first and last subgrid
+       if ((row == 0 && col == 0) || (row == 6 && col == 6))
+           for (int r = row; r < row + 3; ++r) { 
+               for (int c = col; c < col + 3; ++c) {
+                   if (r + c >= 2 && r + c <= 3)
+                       masks[r][c] = true;
+                   if (r + c >= 13 && r + c <= 14)
+                       masks[r][c] = true;
+               }
+              
+           }
+    
+           
+       //mask third and seventh subgrid
+       else if ((row == 0 && col == 6) || (row == 6 && col == 0))
+           for (int r = row; r < row + 3; ++r) { 
+               for (int c = col; c < col + 3; ++c) {
+                   if (r + c == 6 || r + c == 7)
+                       masks[r][c] = true;
+
+               }
+              
+           }
+        
+   }
+   
+   public void maskBoard(int arry[][])
+   {
+       //test 1
+       
+       int row = 0;
+       int col = 0;
+       
+       maskSubGrid(row, col);
+       
+       //test 9
+       row = 7;
+       col = 7;
+      
+       maskSubGrid(row, col);
+       
+       //test 3
+       row = 0;
+       col = 7;
+       
+       maskSubGrid(row, col);
+       
+       //test 3
+       row = 7;
+       col = 0;
+       
+       maskSubGrid(row, col);
+       
+   }
+   
    /** The entry main() entry method */
    public static void main(String[] args) {
       // [TODO 1] (Now)
