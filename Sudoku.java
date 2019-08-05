@@ -5,6 +5,7 @@ import javax.swing.*;     // Uses Swing's Container/Components
 import java.util.Stack;
 import java.util.ArrayList;
 import java.util.Collections;
+//This is the just the start
 /**
  * The Sudoku game.
  * To solve the number puzzle, each row, each column, and each of the
